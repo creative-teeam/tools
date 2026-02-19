@@ -28,7 +28,7 @@ main {
 
 #controls {
   flex: 1;
-  max-width: 450px;
+  max-width: 500px;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -93,7 +93,13 @@ button:hover {
   background-color: #145ca3;
 }
 
-/* テーブル */
+/* 小さいラベル */
+.small-label {
+  font-size: 11px;
+  color: #555;
+}
+
+/* テーブル（ホテル） */
 #hotelTable {
   width: 100%;
   border-collapse: collapse;
@@ -109,6 +115,13 @@ button:hover {
 
 #hotelTable th {
   background-color: #e3f2fd;
+  text-align: left;
+}
+
+/* テーブル内ボタン */
+.pin-btn {
+  padding: 2px 6px;
+  font-size: 11px;
 }
 
 /* 周辺施設リスト */
@@ -117,6 +130,8 @@ button:hover {
   max-height: 170px;
   overflow-y: auto;
   font-size: 12px;
+  border-top: 1px solid #eee;
+  margin-top: 4px;
 }
 
 #placesList li {
@@ -138,10 +153,59 @@ button:hover {
 }
 
 /* ルート情報 */
-#routeInfo {
+#routeInfo,
+#placeRouteInfo {
   margin-top: 4px;
   font-size: 12px;
   white-space: pre-line;
+}
+
+/* 行追加ボタンなど横並び */
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.link-button {
+  font-size: 11px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  background-color: #eee;
+  color: #1976d2;
+  text-decoration: none;
+}
+
+.link-button:hover {
+  background-color: #ddd;
+}
+
+/* 目的地行 / 経由地行のレイアウト */
+.destination-row,
+.waypoint-row {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.destination-row input,
+.waypoint-row input {
+  flex: 1;
+}
+
+.destination-row .time-input {
+  width: 80px;
+}
+
+.remove-row-btn {
+  background-color: #e53935;
+  font-size: 11px;
+  padding: 2px 6px;
+}
+
+.remove-row-btn:hover {
+  background-color: #c62828;
 }
 
 /* フッター */
