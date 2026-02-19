@@ -1,0 +1,153 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+body {
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+header {
+  background-color: #1976d2;
+  color: #fff;
+  padding: 12px 20px;
+}
+
+header h1 {
+  font-size: 20px;
+}
+
+main {
+  display: flex;
+  padding: 10px;
+  gap: 10px;
+}
+
+#controls {
+  flex: 1;
+  max-width: 450px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+#mapSection {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+#mapSection h2 {
+  margin-bottom: 4px;
+}
+
+#map {
+  width: 100%;
+  height: calc(100vh - 120px);
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+/* カード */
+.card {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 10px 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.card label {
+  display: flex;
+  flex-direction: column;
+  font-size: 13px;
+  gap: 4px;
+}
+
+.card input,
+.card select {
+  padding: 4px 6px;
+  border-radius: 4px;
+  border: 1px solid #bbb;
+  font-size: 13px;
+}
+
+button {
+  align-self: flex-start;
+  padding: 6px 10px;
+  border-radius: 4px;
+  border: none;
+  background-color: #1976d2;
+  color: #fff;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #145ca3;
+}
+
+/* テーブル */
+#hotelTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 6px;
+  font-size: 12px;
+}
+
+#hotelTable th,
+#hotelTable td {
+  padding: 4px 6px;
+  border: 1px solid #ddd;
+}
+
+#hotelTable th {
+  background-color: #e3f2fd;
+}
+
+/* 周辺施設リスト */
+#placesList {
+  list-style: none;
+  max-height: 170px;
+  overflow-y: auto;
+  font-size: 12px;
+}
+
+#placesList li {
+  padding: 4px 0;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+}
+
+#placesList li:hover {
+  background-color: #f0f8ff;
+}
+
+/* モデルスケジュール */
+#scheduleResult {
+  font-size: 12px;
+  white-space: pre-line;
+  border-top: 1px solid #eee;
+  padding-top: 4px;
+}
+
+/* ルート情報 */
+#routeInfo {
+  margin-top: 4px;
+  font-size: 12px;
+  white-space: pre-line;
+}
+
+/* フッター */
+footer {
+  text-align: center;
+  font-size: 11px;
+  padding: 4px 0 8px;
+  color: #777;
+}
