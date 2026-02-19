@@ -83,7 +83,6 @@ function buildTripPlan(days) {
   }
 }
 
-// 「表示する日」セレクトの中身を作る
 function refreshDaySelectOptions() {
   const daySelect = document.getElementById("currentDaySelect");
   daySelect.innerHTML = "";
@@ -390,7 +389,6 @@ function updateHotelLinks() {
   const city = document.getElementById("hotelCity").value.trim() || "東京";
   const encoded = encodeURIComponent(city);
 
-  // それぞれ「都市名検索」に近いURLを作る（厳密なパラメータは各サイト仕様次第）
   document.getElementById(
     "linkRakuten"
   ).href = `https://travel.rakuten.co.jp/hotel/${encoded}/`;
@@ -417,15 +415,11 @@ function updateHotelLinks() {
 
   document.getElementById(
     "linkTrivago"
-  ).href = `https://www.trivago.jp/?aDateRange%5Barr%5D=&aDateRange%5Bdep%5D=&aCity=${encoded}`;
+  ).href = `https://www.trivago.jp/?aCity=${encoded}`;
 }
 
 // =========================
-// 3. 周辺施設検索
-//  - 半径1kmで検索
-//  - 見つからない場合は半径を広げて20件まで取得
-//  - すべてピン留め
-//  - 選択した施設まで、徒歩/TRANSIT/車で Directions
+// 3. 周辺施設検索（ジャンルに絞った最大20件）
 // =========================
 function searchNearbyPlaces() {
   const locationStr = document
@@ -465,11 +459,10 @@ function searchNearbyPlaces() {
     placeMarkers.forEach((m) => m.setMap(null));
     placeMarkers = [];
 
-    // 半径を1kmから徐々に広げて、最大20件を目指す
     const baseRadius = 1000; // 1km
-    const maxRadius = 5000; // 最大5kmまで広げる
-    const step = 1000; // 1km刻み
-    const maxResults = 20;
+    const maxRadius = 5000;  // 最大5km
+    const step = 1000;       // 1km刻み
+    const maxResults = 20;   // 最大20件
 
     const placesListEl = document.getElementById("placesList");
     placesListEl.innerHTML = "";
@@ -486,7 +479,7 @@ function searchNearbyPlaces() {
       const nearbyRequest = {
         location: center,
         radius: radius,
-        type: [type],
+        type: [type], // ジャンルで絞る
       };
 
       placesService.nearbySearch(nearbyRequest, (places, nStatus) => {
@@ -503,16 +496,9 @@ function searchNearbyPlaces() {
           }
         }
 
-        if (collected.length >= maxResults || radius === baseRadius) {
-          // 1回目(1km)で十分 or 十分集まったら描画
-          if (collected.length >= maxResults || radius > maxRadius) {
-            renderPlaces(center, collected);
-          } else {
-            // まだ足りないので半径を広げる
-            searchWithRadius(radius + step);
-          }
+        if (collected.length >= maxResults || radius >= maxRadius) {
+          renderPlaces(center, collected);
         } else {
-          // さらに広げる
           searchWithRadius(radius + step);
         }
       });
@@ -527,7 +513,8 @@ function renderPlaces(center, places) {
   placesListEl.innerHTML = "";
 
   if (!places || places.length === 0) {
-    placesListEl.innerHTML = "<li>該当する施設が見つかりませんでした</li>";
+    placesListEl.innerHTML =
+      "<li>指定ジャンルの施設が近くに見つかりませんでした</li>";
     return;
   }
 
@@ -564,7 +551,7 @@ function renderPlaces(center, places) {
   });
 
   document.getElementById("placeRouteInfo").textContent =
-    `施設数：${places.length} 件（最大20件まで表示）`;
+    `該当ジャンルの施設：${places.length} 件（最大20件まで表示）`;
 }
 
 function showRouteFromCenterToPlace(center, placeLocation, mode) {
@@ -600,9 +587,7 @@ function showRouteFromCenterToPlace(center, placeLocation, mode) {
 }
 
 // =========================
-// 4. 最短ルート算出
-//  - TRANSIT を「電車・バス」の公共交通機関として使用
-//  - Google Directions API が最適ルートを算出
+// 4. 最短ルート算出（TRANSIT=電車・バス）
 // =========================
 function calculateOptimizedRoute() {
   const start = document.getElementById("routeStart").value.trim();
