@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <title>旅行計画サポートアプリ</title>
   <link rel="stylesheet" href="style.css" />
-  <!-- Google Maps JS API（あなたのAPIキーでOK）-->
+  <!-- Google Maps JS API（あなたのAPIキー）-->
   <script
     src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBoqcTHl2l19zUjH6b7UwViX_BuJWn66Uo&libraries=places&callback=initMap"
     async
@@ -75,8 +75,8 @@
         <div id="scheduleResult"></div>
       </div>
 
-      <!-- 2. ホテルプラン比較（ここは前回版ベース、ダミー or API接続想定） -->
-      <h2>2. ホテルプラン比較</h2>
+      <!-- 2. ホテルプラン比較：リンクのみ -->
+      <h2>2. ホテルプラン比較（予約サイトへ移動）</h2>
       <div class="card">
         <label>
           宿泊地（都市名）：
@@ -87,43 +87,70 @@
             value="東京"
           />
         </label>
-        <div class="button-row">
-          <button id="compareHotelsBtn">ホテルプランを表示</button>
-          <a
-            id="linkJalan"
-            href="#"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="link-button"
-          >じゃらんで検索</a>
+
+        <p class="small-label">
+          入力した都市名で各予約サイトの検索ページを開きます
+        </p>
+
+        <div class="button-row multi-site-links">
           <a
             id="linkRakuten"
             href="#"
             target="_blank"
             rel="noopener noreferrer"
             class="link-button"
-          >楽天トラベルで検索</a>
+          >楽天トラベル</a>
+
+          <a
+            id="linkJalan"
+            href="#"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="link-button"
+          >じゃらん</a>
+
+          <a
+            id="linkYahooTravel"
+            href="#"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="link-button"
+          >Yahoo!トラベル</a>
+
+          <a
+            id="linkJTB"
+            href="#"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="link-button"
+          >JTB</a>
+
+          <a
+            id="linkRurubu"
+            href="#"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="link-button"
+          >るるぶトラベル</a>
+
           <a
             id="linkAgoda"
             href="#"
             target="_blank"
             rel="noopener noreferrer"
             class="link-button"
-          >Agodaで検索</a>
+          >Agoda</a>
+
+          <a
+            id="linkTrivago"
+            href="#"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="link-button"
+          >trivago</a>
         </div>
 
-        <table id="hotelTable">
-          <thead>
-            <tr>
-              <th>ピン</th>
-              <th>ホテル名</th>
-              <th>価格（1泊）</th>
-              <th>評価</th>
-              <th>サイト</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
+        <button id="updateHotelLinksBtn">各サイトの検索ページを開けるようにする</button>
       </div>
 
       <!-- 3. 周辺施設検索 -->
@@ -148,10 +175,11 @@
           </select>
         </label>
         <label>
-          施設までの移動手段：
+          選択した施設までの移動手段：
           <select id="placeTravelMode">
             <option value="WALKING">徒歩</option>
-            <option value="TRANSIT">公共交通機関</option>
+            <option value="TRANSIT">電車・バス（公共交通機関）</option>
+            <option value="DRIVING">車</option>
           </select>
         </label>
 
@@ -164,7 +192,7 @@
       <!-- 4. 最短ルート算出 -->
       <h2>4. 最短ルート算出</h2>
       <div class="card">
-        <p>複数地点を回るルートを最適化します（徒歩・公共交通機関・車）</p>
+        <p>複数地点を回るルートを最適化します（徒歩・電車/バス・車）</p>
         <label>
           出発地：
           <input
@@ -196,7 +224,7 @@
           <select id="routeTravelMode">
             <option value="DRIVING">自動車</option>
             <option value="WALKING">徒歩</option>
-            <option value="TRANSIT">公共交通機関</option>
+            <option value="TRANSIT">電車・バス（公共交通機関）</option>
           </select>
         </label>
 
