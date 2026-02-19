@@ -7,15 +7,12 @@ let directionsService;
 let directionsRenderer;
 let placesService;
 
-let hotelMarkers = [];
 let placeMarkers = [];
 
-// 複数日用プランデータ
+// 複数日プランデータ
 // tripPlan[dayIndex] = {
-//   startTime: "09:00",
-//   endTime: "20:00",
-//   airportArrivalTime: "",
-//   destinations: [{ place: "浅草寺", time: "10:00" }, ...]
+//   startTime, endTime, airportArrivalTime,
+//   destinations: [{ place, time }]
 // }
 let tripPlan = [];
 
@@ -48,10 +45,10 @@ function initMultiDayPlan() {
 
   tripDaysInput.addEventListener("change", () => {
     const days = Math.max(1, parseInt(tripDaysInput.value, 10) || 1);
-    saveCurrentDayFromUI();       // 変更前の日の内容を保存
-    buildTripPlan(days);         // データ構築
-    refreshDaySelectOptions();   // セレクト更新
-    loadDayToUI(0);              // 1日目をUIへ
+    saveCurrentDayFromUI();
+    buildTripPlan(days);
+    refreshDaySelectOptions();
+    loadDayToUI(0);
   });
 
   daySelect.addEventListener("change", () => {
@@ -60,32 +57,28 @@ function initMultiDayPlan() {
     loadDayToUI(dayIndex);
   });
 
-  // 初期セット（1日）
+  // 初期セット
   buildTripPlan(parseInt(tripDaysInput.value, 10) || 1);
   refreshDaySelectOptions();
   loadDayToUI(0);
 
-  // 「目的地を追加」ボタン
+  // 目的地追加ボタン
   document
     .getElementById("addDestinationBtn")
     .addEventListener("click", () => {
-      addDestinationRow(); // UIに行追加
+      addDestinationRow();
     });
 }
 
 // tripPlanをdays分だけ作る
 function buildTripPlan(days) {
-  // 既存データをできるだけ保持したい場合、本当はマージ処理を書くが、
-  // ここでは単純に作り直す
   tripPlan = [];
   for (let i = 0; i < days; i++) {
     tripPlan.push({
       startTime: "09:00",
       endTime: "20:00",
       airportArrivalTime: "",
-      destinations: [
-        { place: "", time: "10:00" } // デフォルト1行
-      ],
+      destinations: [{ place: "", time: "10:00" }],
     });
   }
 }
@@ -102,13 +95,12 @@ function refreshDaySelectOptions() {
   });
 }
 
-// 現在セレクトされている日インデックス
 function getCurrentDayIndex() {
   const daySelect = document.getElementById("currentDaySelect");
   return parseInt(daySelect.value, 10) || 0;
 }
 
-// 特定日(dayIndex)のデータをUIにロード
+// 特定日のデータをUIにロード
 function loadDayToUI(dayIndex) {
   const dayData = tripPlan[dayIndex];
 
@@ -125,14 +117,12 @@ function loadDayToUI(dayIndex) {
     container.appendChild(row);
   });
 
-  // 行が0なら1行追加
   if (dayData.destinations.length === 0) {
-    const row = createDestinationRow("", "10:00");
-    container.appendChild(row);
+    container.appendChild(createDestinationRow("", "10:00"));
   }
 }
 
-// UIの現在内容を tripPlan の該当日に保存
+// UIの内容をtripPlanの該当日に保存
 function saveCurrentDayFromUI() {
   const dayIndex = getCurrentDayIndex();
   const dayData = tripPlan[dayIndex];
@@ -158,10 +148,11 @@ function saveCurrentDayFromUI() {
     })
     .filter(Boolean);
 
-  dayData.destinations = dests.length > 0 ? dests : [{ place: "", time: "10:00" }];
+  dayData.destinations =
+    dests.length > 0 ? dests : [{ place: "", time: "10:00" }];
 }
 
-// 目的地行を1行作る（place/time指定可）
+// 目的地行を1行作成
 function createDestinationRow(placeValue = "", timeValue = "10:00") {
   const row = document.createElement("div");
   row.className = "destination-row";
@@ -194,20 +185,16 @@ function createDestinationRow(placeValue = "", timeValue = "10:00") {
   return row;
 }
 
-// 「目的地を追加」ボタンから呼ぶ
 function addDestinationRow() {
   const container = document.getElementById("destinationsContainer");
-  const row = createDestinationRow();
-  container.appendChild(row);
+  container.appendChild(createDestinationRow());
 }
 
 // =========================
 // 経由地行（ルート検索用）初期化
 // =========================
 function initWaypointRows() {
-  // 初期1行
   addWaypointRow();
-
   document
     .getElementById("addWaypointBtn")
     .addEventListener("click", addWaypointRow);
@@ -234,12 +221,11 @@ function addWaypointRow() {
 
   row.appendChild(wpInput);
   row.appendChild(removeBtn);
-
   container.appendChild(row);
 }
 
 // =========================
-// イベントハンドラ設定
+// イベントハンドラ
 // =========================
 function attachEventHandlers() {
   document
@@ -247,8 +233,8 @@ function attachEventHandlers() {
     .addEventListener("click", generateAllDaysSchedule);
 
   document
-    .getElementById("compareHotelsBtn")
-    .addEventListener("click", showHotelPlans);
+    .getElementById("updateHotelLinksBtn")
+    .addEventListener("click", updateHotelLinks);
 
   document
     .getElementById("searchPlacesBtn")
@@ -266,10 +252,8 @@ function generateAllDaysSchedule() {
   const departurePlace =
     document.getElementById("departurePlace").value.trim() || "出発地";
 
-  // 現在表示中の日の内容を保存
   saveCurrentDayFromUI();
 
-  // 旅行開始日
   const startDateStr = document.getElementById("tripStartDate").value || "";
   let startDate = null;
   if (startDateStr) {
@@ -279,8 +263,7 @@ function generateAllDaysSchedule() {
   let allLines = [];
 
   tripPlan.forEach((dayData, index) => {
-    const dayIndex = index; // 0-based
-    // 日付計算
+    const dayIndex = index;
     let dateLabel = "";
     if (startDate) {
       const d = new Date(startDate.getTime());
@@ -296,19 +279,17 @@ function generateAllDaysSchedule() {
     );
     const lines = generateScheduleForOneDay(dayData, departurePlace);
     allLines = allLines.concat(lines);
-    allLines.push(""); // 空行
+    allLines.push("");
   });
 
   document.getElementById("scheduleResult").textContent =
     allLines.join("\n");
 
-  // 出発場所をマップで表示
   if (departurePlace && departurePlace !== "出発地") {
     geocodeAndCenter(departurePlace);
   }
 }
 
-// 1日分スケジュール生成（DOMを参照せず、dayDataから計算）
 function generateScheduleForOneDay(dayData, departurePlace) {
   const lines = [];
 
@@ -356,7 +337,7 @@ function generateScheduleForOneDay(dayData, departurePlace) {
     if (d.time) {
       arriveM = parseTimeToMinutes(d.time);
       if (arriveM < cursorTime) {
-        arriveM = cursorTime; // 遅れて到着する扱い
+        arriveM = cursorTime;
       }
     } else {
       const remainingDest = destinations.length - index;
@@ -403,123 +384,54 @@ function generateScheduleForOneDay(dayData, departurePlace) {
 }
 
 // =========================
-// 2. ホテルプラン比較（ダミー版）
+// 2. ホテルプラン比較：リンク更新のみ
 // =========================
-function showHotelPlans() {
+function updateHotelLinks() {
   const city = document.getElementById("hotelCity").value.trim() || "東京";
+  const encoded = encodeURIComponent(city);
+
+  // それぞれ「都市名検索」に近いURLを作る（厳密なパラメータは各サイト仕様次第）
+  document.getElementById(
+    "linkRakuten"
+  ).href = `https://travel.rakuten.co.jp/hotel/${encoded}/`;
 
   document.getElementById(
     "linkJalan"
-  ).href = `https://www.jalan.net/uw/uwp2011/uww2011init.do?lKzn=${encodeURIComponent(
-    city
-  )}`;
+  ).href = `https://www.jalan.net/uw/uwp2011/uww2011init.do?lKzn=${encoded}`;
+
   document.getElementById(
-    "linkRakuten"
-  ).href = `https://travel.rakuten.co.jp/hotel/${encodeURIComponent(
-    city
-  )}/`;
+    "linkYahooTravel"
+  ).href = `https://travel.yahoo.co.jp/search/?kw=${encoded}`;
+
+  document.getElementById(
+    "linkJTB"
+  ).href = `https://www.jtb.co.jp/kokunai_hotel/list/${encoded}/`;
+
+  document.getElementById(
+    "linkRurubu"
+  ).href = `https://rurubu.travel/hotel/list/${encoded}`;
+
   document.getElementById(
     "linkAgoda"
-  ).href = `https://www.agoda.com/ja-jp/search?city=${encodeURIComponent(
-    city
-  )}`;
+  ).href = `https://www.agoda.com/ja-jp/search?city=${encoded}`;
 
-  const dummyHotels = [
-    {
-      name: `${city} セントラルホテル`,
-      price: 12000,
-      rating: 4.3,
-      lat: 35.6811,
-      lng: 139.7672,
-      sites: ["じゃらん", "楽天", "Agoda"],
-    },
-    {
-      name: `${city} ビジネスイン`,
-      price: 8000,
-      rating: 3.9,
-      lat: 35.684,
-      lng: 139.771,
-      sites: ["楽天", "Agoda"],
-    },
-    {
-      name: `${city} ラグジュアリーホテル`,
-      price: 22000,
-      rating: 4.7,
-      lat: 35.676,
-      lng: 139.765,
-      sites: ["じゃらん", "Agoda"],
-    },
-  ];
-
-  // 最安値順にソート
-  dummyHotels.sort((a, b) => a.price - b.price);
-
-  const tbody = document.querySelector("#hotelTable tbody");
-  tbody.innerHTML = "";
-
-  hotelMarkers.forEach((m) => m.setMap(null));
-  hotelMarkers = [];
-
-  dummyHotels.forEach((hotel) => {
-    const tr = document.createElement("tr");
-
-    const pinTd = document.createElement("td");
-    const pinBtn = document.createElement("button");
-    pinBtn.textContent = "ピン";
-    pinBtn.className = "pin-btn";
-    pinBtn.onclick = () => {
-      pinHotelOnMap(hotel);
-    };
-    pinTd.appendChild(pinBtn);
-
-    const nameTd = document.createElement("td");
-    nameTd.textContent = hotel.name;
-
-    const priceTd = document.createElement("td");
-    priceTd.textContent = `${hotel.price.toLocaleString()}円`;
-
-    const ratingTd = document.createElement("td");
-    ratingTd.textContent = hotel.rating.toFixed(1);
-
-    const siteTd = document.createElement("td");
-    siteTd.textContent = hotel.sites.join(" / ");
-
-    tr.appendChild(pinTd);
-    tr.appendChild(nameTd);
-    tr.appendChild(priceTd);
-    tr.appendChild(ratingTd);
-    tr.appendChild(siteTd);
-    tbody.appendChild(tr);
-  });
-
-  geocodeAndCenter(city);
-}
-
-function pinHotelOnMap(hotel) {
-  const position = { lat: hotel.lat, lng: hotel.lng };
-
-  const marker = new google.maps.Marker({
-    map,
-    position,
-    title: hotel.name,
-    icon: {
-      url: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png",
-    },
-  });
-  hotelMarkers.push(marker);
-  map.panTo(position);
-  map.setZoom(15);
+  document.getElementById(
+    "linkTrivago"
+  ).href = `https://www.trivago.jp/?aDateRange%5Barr%5D=&aDateRange%5Bdep%5D=&aCity=${encoded}`;
 }
 
 // =========================
 // 3. 周辺施設検索
+//  - 半径1kmで検索
+//  - 見つからない場合は半径を広げて20件まで取得
+//  - すべてピン留め
+//  - 選択した施設まで、徒歩/TRANSIT/車で Directions
 // =========================
 function searchNearbyPlaces() {
   const locationStr = document
     .getElementById("centerLocation")
     .value.trim();
   const type = document.getElementById("placeType").value;
-  const mode = document.getElementById("placeTravelMode").value;
 
   if (!locationStr) {
     alert("目的地を入力してください");
@@ -553,84 +465,109 @@ function searchNearbyPlaces() {
     placeMarkers.forEach((m) => m.setMap(null));
     placeMarkers = [];
 
-    const nearbyRequest = {
-      location: center,
-      radius: 1500,
-      type: [type],
-    };
+    // 半径を1kmから徐々に広げて、最大20件を目指す
+    const baseRadius = 1000; // 1km
+    const maxRadius = 5000; // 最大5kmまで広げる
+    const step = 1000; // 1km刻み
+    const maxResults = 20;
 
-    placesService.nearbySearch(nearbyRequest, (places, nStatus) => {
-      const placesList = document.getElementById("placesList");
-      placesList.innerHTML = "";
-      document.getElementById("placeRouteInfo").textContent = "";
+    const placesListEl = document.getElementById("placesList");
+    placesListEl.innerHTML = "";
+    document.getElementById("placeRouteInfo").textContent = "";
 
-      if (
-        nStatus !== google.maps.places.PlacesServiceStatus.OK ||
-        !places ||
-        places.length === 0
-      ) {
-        placesList.innerHTML = "<li>該当する施設が見つかりませんでした</li>";
+    let collected = [];
+
+    function searchWithRadius(radius) {
+      if (radius > maxRadius || collected.length >= maxResults) {
+        renderPlaces(center, collected);
         return;
       }
 
-      places.forEach((place) => {
-        if (!place.geometry || !place.geometry.location) return;
+      const nearbyRequest = {
+        location: center,
+        radius: radius,
+        type: [type],
+      };
 
-        const li = document.createElement("li");
-        li.textContent = `${place.name}（評価 ${
-          place.rating ?? "N/A"
-        }）`;
-        li.addEventListener("click", () => {
-          map.panTo(place.geometry.location);
-          map.setZoom(17);
-          showRouteFromCenterToPlace(center, place.geometry.location, mode);
-        });
+      placesService.nearbySearch(nearbyRequest, (places, nStatus) => {
+        if (
+          nStatus === google.maps.places.PlacesServiceStatus.OK &&
+          places &&
+          places.length > 0
+        ) {
+          for (const p of places) {
+            if (!p.geometry || !p.geometry.location) continue;
+            if (collected.find((c) => c.place_id === p.place_id)) continue;
+            collected.push(p);
+            if (collected.length >= maxResults) break;
+          }
+        }
 
-        placesList.appendChild(li);
-
-        const marker = new google.maps.Marker({
-          map,
-          position: place.geometry.location,
-          title: place.name,
-          icon: {
-            url: "http://maps.google.com/mapfiles/ms/icons/green-dot.png",
-          },
-        });
-        placeMarkers.push(marker);
+        if (collected.length >= maxResults || radius === baseRadius) {
+          // 1回目(1km)で十分 or 十分集まったら描画
+          if (collected.length >= maxResults || radius > maxRadius) {
+            renderPlaces(center, collected);
+          } else {
+            // まだ足りないので半径を広げる
+            searchWithRadius(radius + step);
+          }
+        } else {
+          // さらに広げる
+          searchWithRadius(radius + step);
+        }
       });
-
-      const nearest = findNearestPlace(center, places);
-      if (nearest) {
-        showRouteFromCenterToPlace(
-          center,
-          nearest.geometry.location,
-          mode,
-          true
-        );
-      }
-    });
-  });
-}
-
-function findNearestPlace(center, places) {
-  if (!center || !places || places.length === 0) return null;
-  let minDist = Infinity;
-  let nearest = null;
-  places.forEach((p) => {
-    if (!p.geometry || !p.geometry.location) return;
-    const loc = p.geometry.location;
-    const dx = center.lat() - loc.lat();
-    const dy = center.lng() - loc.lng();
-    const d = dx * dx + dy * dy;
-    if (d < minDist) {
-      minDist = d;
-      nearest = p;
     }
+
+    searchWithRadius(baseRadius);
   });
-  return nearest;
 }
 
-function showRouteFromCenterToPlace(center, placeLocation, mode, isNearest) {
+function renderPlaces(center, places) {
+  const placesListEl = document.getElementById("placesList");
+  placesListEl.innerHTML = "";
+
+  if (!places || places.length === 0) {
+    placesListEl.innerHTML = "<li>該当する施設が見つかりませんでした</li>";
+    return;
+  }
+
+  placeMarkers.forEach((m) => m.setMap(null));
+  placeMarkers = [];
+
+  const travelModeSelect = document.getElementById("placeTravelMode");
+
+  places.forEach((place) => {
+    if (!place.geometry || !place.geometry.location) return;
+
+    const li = document.createElement("li");
+    li.textContent = `${place.name}（評価 ${
+      place.rating ?? "N/A"
+    }）`;
+    li.addEventListener("click", () => {
+      const mode = travelModeSelect.value; // WALKING / TRANSIT / DRIVING
+      map.panTo(place.geometry.location);
+      map.setZoom(17);
+      showRouteFromCenterToPlace(center, place.geometry.location, mode);
+    });
+
+    placesListEl.appendChild(li);
+
+    const marker = new google.maps.Marker({
+      map,
+      position: place.geometry.location,
+      title: place.name,
+      icon: {
+        url: "http://maps.google.com/mapfiles/ms/icons/green-dot.png",
+      },
+    });
+    placeMarkers.push(marker);
+  });
+
+  document.getElementById("placeRouteInfo").textContent =
+    `施設数：${places.length} 件（最大20件まで表示）`;
+}
+
+function showRouteFromCenterToPlace(center, placeLocation, mode) {
   const request = {
     origin: center,
     destination: placeLocation,
@@ -640,6 +577,8 @@ function showRouteFromCenterToPlace(center, placeLocation, mode, isNearest) {
   directionsService.route(request, (result, status) => {
     if (status !== google.maps.DirectionsStatus.OK) {
       console.warn("ルート計算失敗: ", status);
+      document.getElementById("placeRouteInfo").textContent =
+        "ルートの計算に失敗しました";
       return;
     }
     directionsRenderer.setDirections(result);
@@ -648,21 +587,22 @@ function showRouteFromCenterToPlace(center, placeLocation, mode, isNearest) {
     const distanceText = leg.distance.text;
     const durationText = leg.duration.text;
 
+    let modeLabel = "";
+    if (mode === "WALKING") modeLabel = "徒歩";
+    else if (mode === "TRANSIT") modeLabel = "電車・バス（公共交通機関）";
+    else if (mode === "DRIVING") modeLabel = "車";
+
     const infoElement = document.getElementById("placeRouteInfo");
-    if (isNearest) {
-      infoElement.textContent =
-        `中心から最も近い施設までのルート（${mode}）:\n` +
-        `距離：${distanceText}\n時間：${durationText}`;
-    } else {
-      infoElement.textContent =
-        `選択した施設までのルート（${mode}）:\n` +
-        `距離：${distanceText}\n時間：${durationText}`;
-    }
+    infoElement.textContent =
+      `選択した施設までのルート（${modeLabel}）:\n` +
+      `距離：${distanceText}\n時間：${durationText}`;
   });
 }
 
 // =========================
 // 4. 最短ルート算出
+//  - TRANSIT を「電車・バス」の公共交通機関として使用
+//  - Google Directions API が最適ルートを算出
 // =========================
 function calculateOptimizedRoute() {
   const start = document.getElementById("routeStart").value.trim();
@@ -698,7 +638,7 @@ function calculateOptimizedRoute() {
     destination,
     waypoints,
     optimizeWaypoints: true,
-    travelMode: google.maps.TravelMode[mode],
+    travelMode: google.maps.TravelMode[mode], // WALKING/DRIVING/TRANSIT
   };
 
   directionsService.route(request, (result, status) => {
@@ -724,8 +664,13 @@ function calculateOptimizedRoute() {
     const order = route.waypoint_order;
     const orderedNames = order.map((idx) => waypointNames[idx]);
 
+    let modeLabel = "";
+    if (mode === "WALKING") modeLabel = "徒歩";
+    else if (mode === "TRANSIT") modeLabel = "電車・バス（公共交通機関）";
+    else if (mode === "DRIVING") modeLabel = "自動車";
+
     let infoText = "";
-    infoText += `移動手段：${mode}\n`;
+    infoText += `移動手段：${modeLabel}\n`;
     infoText += `推定合計距離：${distanceKm} km\n`;
     infoText += `推定合計時間：${durationMin} 分\n\n`;
     infoText += "訪問順序（最適化後）:\n";
