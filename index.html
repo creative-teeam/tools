@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <title>旅行計画サポートアプリ</title>
   <link rel="stylesheet" href="style.css" />
-  <!-- Google Maps JS API（必須：あなたのAPIキーに変更）-->
+  <!-- Google Maps JS API（あなたのAPIキーでOK）-->
   <script
     src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBoqcTHl2l19zUjH6b7UwViX_BuJWn66Uo&libraries=places&callback=initMap"
     async
@@ -19,28 +19,63 @@
   <main>
     <!-- 左ペイン：入力フォーム -->
     <section id="controls">
-      <h2>1. 一日の行動モデル作成</h2>
+      <!-- 1. 複数日対応 一日の行動モデル作成 -->
+      <h2>1. 日程（複数日）モデル作成</h2>
       <div class="card">
         <label>
-          出発時間：
-          <input type="time" id="startTime" value="09:00" />
-        </label>
-        <label>
-          戻り時間：
-          <input type="time" id="endTime" value="20:00" />
-        </label>
-        <label>
-          滞在したいスポット（カンマ区切り）：
+          出発場所：
           <input
             type="text"
-            id="spotsInput"
-            placeholder="例：浅草寺, 東京スカイツリー, 上野公園"
+            id="departurePlace"
+            placeholder="例：羽田空港、東京駅、ホテル名など"
           />
         </label>
-        <button id="generateScheduleBtn">モデルを作成</button>
+
+        <label>
+          旅行開始日：
+          <input type="date" id="tripStartDate" />
+        </label>
+
+        <label>
+          日数：
+          <input type="number" id="tripDays" value="1" min="1" max="14" />
+        </label>
+
+        <label>
+          表示する日：
+          <select id="currentDaySelect"></select>
+        </label>
+
+        <label>
+          出発時間（この日）：
+          <input type="time" id="startTime" value="09:00" />
+        </label>
+
+        <label>
+          空港到着時間（この日・任意）：
+          <input type="time" id="airportArrivalTime" value="" />
+        </label>
+
+        <label>
+          戻り時間（この日）：
+          <input type="time" id="endTime" value="20:00" />
+        </label>
+
+        <div id="scheduleDestinationsWrapper">
+          <p class="small-label">
+            目的地と滞在開始時間（行を追加できます・日ごとに別管理）
+          </p>
+          <div id="destinationsContainer">
+            <!-- 動的に行を追加 -->
+          </div>
+          <button type="button" id="addDestinationBtn">目的地を追加</button>
+        </div>
+
+        <button id="generateScheduleBtn">全日程のモデルを作成</button>
         <div id="scheduleResult"></div>
       </div>
 
+      <!-- 2. ホテルプラン比較（ここは前回版ベース、ダミー or API接続想定） -->
       <h2>2. ホテルプラン比較</h2>
       <div class="card">
         <label>
@@ -52,20 +87,46 @@
             value="東京"
           />
         </label>
-        <button id="compareHotelsBtn">ホテルプランを表示</button>
+        <div class="button-row">
+          <button id="compareHotelsBtn">ホテルプランを表示</button>
+          <a
+            id="linkJalan"
+            href="#"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="link-button"
+          >じゃらんで検索</a>
+          <a
+            id="linkRakuten"
+            href="#"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="link-button"
+          >楽天トラベルで検索</a>
+          <a
+            id="linkAgoda"
+            href="#"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="link-button"
+          >Agodaで検索</a>
+        </div>
+
         <table id="hotelTable">
           <thead>
             <tr>
+              <th>ピン</th>
               <th>ホテル名</th>
               <th>価格（1泊）</th>
               <th>評価</th>
-              <th>駅からの距離</th>
+              <th>サイト</th>
             </tr>
           </thead>
           <tbody></tbody>
         </table>
       </div>
 
+      <!-- 3. 周辺施設検索 -->
       <h2>3. 周辺施設検索</h2>
       <div class="card">
         <label>
@@ -86,13 +147,24 @@
             <option value="shopping_mall">ショッピングモール</option>
           </select>
         </label>
+        <label>
+          施設までの移動手段：
+          <select id="placeTravelMode">
+            <option value="WALKING">徒歩</option>
+            <option value="TRANSIT">公共交通機関</option>
+          </select>
+        </label>
+
         <button id="searchPlacesBtn">周辺施設を表示</button>
         <ul id="placesList"></ul>
+
+        <div id="placeRouteInfo"></div>
       </div>
 
+      <!-- 4. 最短ルート算出 -->
       <h2>4. 最短ルート算出</h2>
       <div class="card">
-        <p>複数地点を回るルートを最適化します（Google Directions API利用）</p>
+        <p>複数地点を回るルートを最適化します（徒歩・公共交通機関・車）</p>
         <label>
           出発地：
           <input
@@ -101,14 +173,15 @@
             placeholder="例：東京駅"
           />
         </label>
-        <label>
-          経由地（カンマ区切り）：
-          <input
-            type="text"
-            id="routeWaypoints"
-            placeholder="例：浅草寺, 東京スカイツリー, 上野公園"
-          />
-        </label>
+
+        <div id="waypointsWrapper">
+          <p class="small-label">経由地（行を追加できます）</p>
+          <div id="waypointsContainer">
+            <!-- 動的に行を追加 -->
+          </div>
+          <button type="button" id="addWaypointBtn">経由地を追加</button>
+        </div>
+
         <label>
           終点（空欄なら出発地に戻る）：
           <input
@@ -117,6 +190,16 @@
             placeholder="例：東京駅"
           />
         </label>
+
+        <label>
+          移動手段：
+          <select id="routeTravelMode">
+            <option value="DRIVING">自動車</option>
+            <option value="WALKING">徒歩</option>
+            <option value="TRANSIT">公共交通機関</option>
+          </select>
+        </label>
+
         <button id="calcRouteBtn">最短ルートを計算</button>
         <div id="routeInfo"></div>
       </div>
