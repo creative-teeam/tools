@@ -19,7 +19,7 @@
   <main>
     <!-- 左ペイン：入力フォーム -->
     <section id="controls">
-      <!-- 1. 複数日対応 一日の行動モデル作成 -->
+      <!-- 1. 日程（複数日）モデル作成 -->
       <h2>1. 日程（複数日）モデル作成</h2>
       <div class="card">
         <label>
@@ -66,7 +66,7 @@
             目的地と滞在開始時間（行を追加できます・日ごとに別管理）
           </p>
           <div id="destinationsContainer">
-            <!-- 動的に行を追加 -->
+            <!-- JSで動的に行が入る -->
           </div>
           <button type="button" id="addDestinationBtn">目的地を追加</button>
         </div>
@@ -75,7 +75,7 @@
         <div id="scheduleResult"></div>
       </div>
 
-      <!-- 2. ホテルプラン比較：リンクのみ -->
+      <!-- 2. ホテルプラン比較（予約サイトリンクのみ） -->
       <h2>2. ホテルプラン比較（予約サイトへ移動）</h2>
       <div class="card">
         <label>
@@ -150,7 +150,9 @@
           >trivago</a>
         </div>
 
-        <button id="updateHotelLinksBtn">各サイトの検索ページを開けるようにする</button>
+        <button id="updateHotelLinksBtn">
+          各サイトの検索ページを開けるようにする
+        </button>
       </div>
 
       <!-- 3. 周辺施設検索 -->
@@ -205,7 +207,7 @@
         <div id="waypointsWrapper">
           <p class="small-label">経由地（行を追加できます）</p>
           <div id="waypointsContainer">
-            <!-- 動的に行を追加 -->
+            <!-- JSで動的に経由地行が入る -->
           </div>
           <button type="button" id="addWaypointBtn">経由地を追加</button>
         </div>
