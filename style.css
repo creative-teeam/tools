@@ -1,3 +1,4 @@
+/* 全体共通設定 */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -10,6 +11,7 @@ body {
   color: #333;
 }
 
+/* ヘッダー */
 header {
   background-color: #1976d2;
   color: #fff;
@@ -20,6 +22,7 @@ header h1 {
   font-size: 20px;
 }
 
+/* レイアウト */
 main {
   display: flex;
   padding: 10px;
@@ -52,7 +55,7 @@ main {
   border: 1px solid #ccc;
 }
 
-/* カード */
+/* カードUI */
 .card {
   background-color: #fff;
   border-radius: 8px;
@@ -78,6 +81,7 @@ main {
   font-size: 13px;
 }
 
+/* ボタン */
 button {
   align-self: flex-start;
   padding: 6px 10px;
@@ -93,13 +97,13 @@ button:hover {
   background-color: #145ca3;
 }
 
-/* 小さいラベル */
+/* 小さいラベル（説明文など） */
 .small-label {
   font-size: 11px;
   color: #555;
 }
 
-/* リンクボタン */
+/* リンクボタン（ホテル予約サイト用） */
 .button-row {
   display: flex;
   flex-wrap: wrap;
@@ -120,12 +124,11 @@ button:hover {
   background-color: #ddd;
 }
 
-/* 複数予約サイトリンクを見やすく */
 .multi-site-links {
   justify-content: flex-start;
 }
 
-/* モデル目的地 / 経由地行 */
+/* 目的地行 / 経由地行のレイアウト */
 .destination-row,
 .waypoint-row {
   display: flex;
@@ -142,10 +145,12 @@ button:hover {
   width: 80px;
 }
 
+/* 行削除ボタン */
 .remove-row-btn {
   background-color: #e53935;
   font-size: 11px;
   padding: 2px 6px;
+  color: #fff;
 }
 
 .remove-row-btn:hover {
@@ -172,7 +177,7 @@ button:hover {
   background-color: #f0f8ff;
 }
 
-/* モデルスケジュール */
+/* スケジュール表示 */
 #scheduleResult {
   font-size: 12px;
   white-space: pre-line;
@@ -180,7 +185,7 @@ button:hover {
   padding-top: 4px;
 }
 
-/* ルート情報 */
+/* ルート情報表示 */
 #routeInfo,
 #placeRouteInfo {
   margin-top: 4px;
@@ -194,4 +199,10 @@ footer {
   font-size: 11px;
   padding: 4px 0 8px;
   color: #777;
+}
+
+/* 見出し */
+h2 {
+  font-size: 15px;
+  margin-bottom: 4px;
 }
