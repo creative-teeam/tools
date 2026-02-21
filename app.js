@@ -2,7 +2,7 @@
 // Google Maps 関連
 // =========================
 let map;
-let markers = [];        // 汎用マーカー（今回は施設用には使わない）
+let markers = [];        // 汎用マーカー（出発地などに使用）
 let directionsService;
 let directionsRenderer;
 let placesService;
@@ -416,9 +416,9 @@ function updateHotelLinks() {
 
 // =========================
 // 3. 周辺施設検索
-//  - 目的地にピンは立てない
-//  - ジャンルに絞った最大20件にピン留め
-//  - クリックした施設ごとに選択した移動手段でルート表示
+//  - 目的地にはピンを立てない
+//  - ジャンルに絞った最大20件にピン留め（検索直後に全部）
+//  - リストクリック時、選択中の移動手段で最短ルート表示
 // =========================
 function searchNearbyPlaces() {
   const locationStr = document
@@ -449,11 +449,11 @@ function searchNearbyPlaces() {
     const centerPlace = results[0];
     const center = centerPlace.geometry.location;
 
-    // 中心へ移動（ピンは立てない）
+    // 地図の中心だけ移動（ここでは中心ピンは立てない）
     map.setCenter(center);
     map.setZoom(15);
 
-    // 既存のマーカーをすべて消す（中心・施設とも）
+    // 既存マーカーをすべて消す
     clearMarkers();
     placeMarkers.forEach((m) => m.setMap(null));
     placeMarkers = [];
@@ -478,7 +478,7 @@ function searchNearbyPlaces() {
       const nearbyRequest = {
         location: center,
         radius: radius,
-        type: [type], // ジャンルで絞る
+        type: [type], // 選択ジャンルで絞る
       };
 
       placesService.nearbySearch(nearbyRequest, (places, nStatus) => {
@@ -526,6 +526,7 @@ function renderPlaces(center, places) {
   places.forEach((place) => {
     if (!place.geometry || !place.geometry.location) return;
 
+    // リスト表示
     const li = document.createElement("li");
     li.textContent = `${place.name}（評価 ${
       place.rating ?? "N/A"
@@ -539,6 +540,7 @@ function renderPlaces(center, places) {
 
     placesListEl.appendChild(li);
 
+    // 抽出した最大20件をすべてピン留め
     const marker = new google.maps.Marker({
       map,
       position: place.geometry.location,
@@ -554,7 +556,7 @@ function renderPlaces(center, places) {
     `該当ジャンルの施設：${places.length} 件（最大20件まで表示）`;
 }
 
-// 目的地中心 → 選択施設 へのルート表示
+// 中心 → 選択施設 へのルートを、選択中の移動手段で表示
 function showRouteFromCenterToPlace(center, placeLocation, mode) {
   const request = {
     origin: center,
@@ -562,7 +564,7 @@ function showRouteFromCenterToPlace(center, placeLocation, mode) {
     travelMode: google.maps.TravelMode[mode],
   };
 
-  // 公共交通機関の場合、出発時間を現在時刻に指定してルートが出やすくする
+  // 公共交通機関のときは departureTime を指定（電車・バスルートが出やすくする）
   if (mode === "TRANSIT") {
     request.transitOptions = {
       departureTime: new Date(),
@@ -595,8 +597,8 @@ function showRouteFromCenterToPlace(center, placeLocation, mode) {
 }
 
 // =========================
-// 4. 最短ルート算出
-//  - TRANSIT で電車・バスのルートを算出できるように transitOptions を指定
+// 4. 最短ルート算出（複数地点）
+//  - TRANSIT（電車・バス）のルートを出やすくするため transitOptions 設定
 // =========================
 function calculateOptimizedRoute() {
   const start = document.getElementById("routeStart").value.trim();
@@ -635,8 +637,8 @@ function calculateOptimizedRoute() {
     travelMode: google.maps.TravelMode[mode], // WALKING/DRIVING/TRANSIT
   };
 
-  // 公共交通機関のときは出発時刻を現在時刻にしてルートを出しやすくする
   if (mode === "TRANSIT") {
+    // 出発時刻を現在時刻にして、電車・バスルートが出るようにする
     request.transitOptions = {
       departureTime: new Date(),
     };
