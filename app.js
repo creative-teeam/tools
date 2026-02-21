@@ -2,12 +2,12 @@
 // Google Maps 関連
 // =========================
 let map;
-let markers = [];
+let markers = [];        // 汎用マーカー（今回は施設用には使わない）
 let directionsService;
 let directionsRenderer;
 let placesService;
 
-let placeMarkers = [];
+let placeMarkers = [];   // 周辺施設用マーカー
 
 // 複数日プランデータ
 // tripPlan[dayIndex] = {
@@ -70,7 +70,6 @@ function initMultiDayPlan() {
     });
 }
 
-// tripPlanをdays分だけ作る
 function buildTripPlan(days) {
   tripPlan = [];
   for (let i = 0; i < days; i++) {
@@ -99,7 +98,6 @@ function getCurrentDayIndex() {
   return parseInt(daySelect.value, 10) || 0;
 }
 
-// 特定日のデータをUIにロード
 function loadDayToUI(dayIndex) {
   const dayData = tripPlan[dayIndex];
 
@@ -121,7 +119,6 @@ function loadDayToUI(dayIndex) {
   }
 }
 
-// UIの内容をtripPlanの該当日に保存
 function saveCurrentDayFromUI() {
   const dayIndex = getCurrentDayIndex();
   const dayData = tripPlan[dayIndex];
@@ -151,7 +148,6 @@ function saveCurrentDayFromUI() {
     dests.length > 0 ? dests : [{ place: "", time: "10:00" }];
 }
 
-// 目的地行を1行作成
 function createDestinationRow(placeValue = "", timeValue = "10:00") {
   const row = document.createElement("div");
   row.className = "destination-row";
@@ -419,7 +415,10 @@ function updateHotelLinks() {
 }
 
 // =========================
-// 3. 周辺施設検索（ジャンルに絞った最大20件）
+// 3. 周辺施設検索
+//  - 目的地にピンは立てない
+//  - ジャンルに絞った最大20件にピン留め
+//  - クリックした施設ごとに選択した移動手段でルート表示
 // =========================
 function searchNearbyPlaces() {
   const locationStr = document
@@ -450,12 +449,12 @@ function searchNearbyPlaces() {
     const centerPlace = results[0];
     const center = centerPlace.geometry.location;
 
+    // 中心へ移動（ピンは立てない）
     map.setCenter(center);
     map.setZoom(15);
 
+    // 既存のマーカーをすべて消す（中心・施設とも）
     clearMarkers();
-    addMarker(center, `${locationStr}（中心）`);
-
     placeMarkers.forEach((m) => m.setMap(null));
     placeMarkers = [];
 
@@ -504,6 +503,7 @@ function searchNearbyPlaces() {
       });
     }
 
+    // 半径1kmから開始
     searchWithRadius(baseRadius);
   });
 }
@@ -554,12 +554,20 @@ function renderPlaces(center, places) {
     `該当ジャンルの施設：${places.length} 件（最大20件まで表示）`;
 }
 
+// 目的地中心 → 選択施設 へのルート表示
 function showRouteFromCenterToPlace(center, placeLocation, mode) {
   const request = {
     origin: center,
     destination: placeLocation,
     travelMode: google.maps.TravelMode[mode],
   };
+
+  // 公共交通機関の場合、出発時間を現在時刻に指定してルートが出やすくする
+  if (mode === "TRANSIT") {
+    request.transitOptions = {
+      departureTime: new Date(),
+    };
+  }
 
   directionsService.route(request, (result, status) => {
     if (status !== google.maps.DirectionsStatus.OK) {
@@ -587,7 +595,8 @@ function showRouteFromCenterToPlace(center, placeLocation, mode) {
 }
 
 // =========================
-// 4. 最短ルート算出（TRANSIT=電車・バス）
+// 4. 最短ルート算出
+//  - TRANSIT で電車・バスのルートを算出できるように transitOptions を指定
 // =========================
 function calculateOptimizedRoute() {
   const start = document.getElementById("routeStart").value.trim();
@@ -625,6 +634,13 @@ function calculateOptimizedRoute() {
     optimizeWaypoints: true,
     travelMode: google.maps.TravelMode[mode], // WALKING/DRIVING/TRANSIT
   };
+
+  // 公共交通機関のときは出発時刻を現在時刻にしてルートを出しやすくする
+  if (mode === "TRANSIT") {
+    request.transitOptions = {
+      departureTime: new Date(),
+    };
+  }
 
   directionsService.route(request, (result, status) => {
     if (status !== google.maps.DirectionsStatus.OK) {
